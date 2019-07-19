@@ -30,7 +30,18 @@ FeaturesCalc.py file contains the code to calculate the features. This program i
 - StDev_payload
 - Avg_DNS_over_TCP: The average of ration DNS/TCP in a window of packets.
 - Label: 0|1 respectively if pcap is legitimate or malware.
-
+## CSV
+The features are saved in a csv file.
+### Example
+```
+csv = CSV(file_name="features")
+csv.create_empty_csv()
+#Here i add the header of csv file.
+csv.add_row(featuresCalc.get_features_name())
+#Here i add a generic row.
+features = featuresCalc.compute_features(array_of_pkts)
+csv.add_row(features)
+```
 ## Attacker Calculation
 AttackerCalc.py file computes an attacker from a malware pcap. The first ip in a malware pcap is probably the attacker because it starts the communication flow.
 
@@ -67,3 +78,4 @@ In Main.py file there is an example of usage of this program. You can run it wit
 ```
 python3 Main.py
 ```
+This file creates a single csv every run. So if you put 4 pcaps in a generic folder (or in both folders), the Main.py file creates a single csv with features of 4 (or 8) pcaps.
