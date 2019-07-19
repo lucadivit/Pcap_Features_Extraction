@@ -38,6 +38,7 @@ AttackerCalc.py file computes an attacker from a malware pcap. The first ip in a
 PacketFilter.py file filters a packet. 
 ### Example
 ```
+attacker = AttackerCalc(pcap=pcap)
 ip_to_consider = attacker.compute_attacker()
 ip_to_ignore = ["127.0.0.1"]
 
