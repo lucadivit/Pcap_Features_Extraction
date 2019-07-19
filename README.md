@@ -59,7 +59,7 @@ filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=Tru
 if ((filter_2.check_packet_filter(pkt) or filter_1.check_packet_filter(pkt)) is True):
     print("pkt accepted")
 ```
-This code accept a packet if it has a TCP Layer or UDP Layer.
+This code accepts a packet if it has a TCP Layer or UDP Layer.
 
 ## Example Of Usage
 In Main.py file there is an example of usage of this program. You can run it with:
