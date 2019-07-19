@@ -1,5 +1,7 @@
 # Pcap_Features_Extraction
 This program allow you to extract some features from pcap files.
+## Folders
+You have to put some pcaps in respective folders.
 ## Features Calculation
 FeaturesCalc.py file contains the code to calculate the features. This program is thinked for two type of pcaps: Malware Pcaps and Legitimate Pcaps. There are 26 features:
 - Avg_syn_flag: The average of packets with syn flag active in a window of packtes.
@@ -26,6 +28,41 @@ FeaturesCalc.py file contains the code to calculate the features. This program i
 - Min_payload
 - Max_payload
 - StDev_payload
-- Avg_DNS_over_TCP
+- Avg_DNS_over_TCP: The average of ration DNS/TCP in a window of packets.
+- Label: 0|1 respectively if pcap is legitimate or malware.
+
+## Attacker Calculation
+AttackerCalc.py file computes an attacker from a malware pcap. The first ip in a malware pcap is probably the attacker because it starts the communication flow.
+
+## Packet Filter 
+PacketFilter.py file filters a packet. 
+### Example
+```
+ip_to_consider = attacker.compute_attacker()
+ip_to_ignore = ["127.0.0.1"]
+
+filter_1 = PacketFilter(ip_whitelist_filter=ip_to_consider, ip_blacklist_filter=[], IPv4=True, TCP=True, UDP=False)
+```
+This filter accepts all the packets with ip: ip_to_consider which have TCP layer.
+```
+filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=ip_to_ignore, IPv4=True, TCP=False, UDP=True)
+```
+This filter accepts all the packets which haven't ip: ip_to_ignore with UDP layer.
+```
+filter_3 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=False, UDP=False)
+```
+This filter accepts all packets with IP layer.
+You can use these filters in the following way:
+```
+filter_1 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=True, UDP=False)
+filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=False, UDP=True)
+if ((filter_2.check_packet_filter(pkt) or filter_1.check_packet_filter(pkt)) is True):
+    print("pkt accepted")
+```
+This code accept a packet if it has a TCP Layer or UDP Layer.
+
 ## Example Of Usage
-In Main.py file there is an example of usage of this program. In my example i split pcap in two fields: Malware Pcap and Legitimate Pcap.
+In Main.py file there is an example of usage of this program. You can run it with:
+```
+python3 Main.py
+```
