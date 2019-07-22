@@ -53,21 +53,21 @@ attacker = AttackerCalc(pcap=pcap)
 ip_to_consider = attacker.compute_attacker()
 ip_to_ignore = ["127.0.0.1"]
 
-filter_1 = PacketFilter(ip_whitelist_filter=ip_to_consider, ip_blacklist_filter=[], IPv4=True, TCP=True, UDP=False)
+filter_1 = PacketFilter(ip_whitelist_filter=ip_to_consider, ip_blacklist_filter=[], TCP=True)
 ```
 This filter accepts all the packets with ip: ip_to_consider which have TCP layer.
 ```
-filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=ip_to_ignore, IPv4=True, TCP=False, UDP=True)
+filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=ip_to_ignore, UDP=True)
 ```
 This filter accepts all the packets which haven't ip: ip_to_ignore with UDP layer.
 ```
-filter_3 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=False, UDP=False)
+filter_3 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True)
 ```
 This filter accepts all packets with IP layer.
 You can use these filters in the following way:
 ```
-filter_1 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=True, UDP=False)
-filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=True, TCP=False, UDP=True)
+filter_1 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], TCP=True, UDP=False)
+filter_2 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=[], TCP=False, UDP=True)
 if ((filter_2.check_packet_filter(pkt) or filter_1.check_packet_filter(pkt)) is True):
     print("pkt accepted")
 ```
