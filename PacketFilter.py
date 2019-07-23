@@ -9,7 +9,7 @@ class PacketFilter():
         self.UDP = UDP
         self.ICMP = ICMP
         filters = [self.IPv4, self.TCP, self.UDP, self.ICMP]
-        assert sum(filters) == 1, "You have to set one, and just one protocol filter."
+        assert sum(filters) <= 1, "You have to set just one protocol filter."
         if(len(self.ip_whitelist_filter) > 0 or len(self.ip_blacklist_filter) > 0):
             self.set_IPv4_filter(True)
 
