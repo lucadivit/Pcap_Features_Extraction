@@ -310,6 +310,12 @@ class FeaturesCalc():
     def get_total_sample(self):
         return self.nb_samples
 
+    def reset_sample_counter(self):
+        self.nb_samples = 0
+
+    def reset_total_pkts_counter(self):
+        self.total_packets = 0
+
     def set_min_window_size(self, val):
         self.min_window_size = val
 
