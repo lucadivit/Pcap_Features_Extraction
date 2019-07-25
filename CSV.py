@@ -63,11 +63,7 @@ class CSV():
             self.csv_r.close()
 
     def open_csv(self):
-        file_name = ""
-        if (self.folder_name == ""):
-            file_name = self.file_name
-        else:
-            file_name = self.folder_name + "/" + self.file_name
+        file_name = self.get_file_path()
         try:
             self.csv_w = open(file_name, "a+")
             self.csv_r = open(file_name, "r")
@@ -84,20 +80,17 @@ class CSV():
         else:
             pass
 
+    '''
     def read_row(self, row_number):
-        file_name = ""
-        if (self.folder_name == ""):
-            file_name = self.file_name
-        else:
-            file_name = self.folder_name + "/" + self.file_name
+        file_name = self.get_file_path()
         if(self.csv_r is not None):
             try:
                 csv_reader = csv.reader(self.csv_r, delimiter=",")
-                print(csv_reader)
                 for row in csv_reader:
                     print(row)
             except Exception as e:
                 print (e)
+    '''
 
 
     def get_number_of_rows(self, ignore_header=True):
@@ -105,18 +98,26 @@ class CSV():
             return self.rows - 1
         else:
             return self.rows
-
-    def get_folder_name(self):
-        return self.folder_name
+    '''
 
     def get_file_name(self):
         return self.file_name
-
-    def get_current_file_name(self):
-        return self.current_file_name
-
+    
     def set_folder_name(self, folder_name):
         self.folder_name = folder_name
 
     def set_file_name(self, file_name):
         self.file_name = file_name
+    '''
+
+    def get_folder_name(self):
+        return self.folder_name
+
+    def get_current_file_name(self):
+        return self.current_file_name
+
+    def get_file_path(self):
+        if(self.get_folder_name() == ""):
+            return self.get_current_file_name()
+        else:
+            return self.get_folder_name() + "/" + self.get_current_file_name()
