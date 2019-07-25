@@ -22,13 +22,16 @@ class FeaturesCalc():
         "Avg_pkts_lenght", "Min_pkts_lenght", "Max_pkts_lenght", "StDev_pkts_lenght", "Avg_small_payload_pkt", "Avg_payload", "Min_payload",
         "Max_payload", "StDev_payload", "Avg_DNS_over_TCP", "Label"]
 
+        self.total_packets = 0
+        self.nb_samples = 0
+
     def compute_features(self, packets_list):
 
-        if(len(packets_list) < self.get_min_window_size()):
-            print("\nNumero di paccheti troppo basso\n")
-            return
-        else:
-            pass
+        def increment_sample_nb(nb):
+            self.nb_samples += nb
+
+        def update_received_pkts(nb):
+            self.total_packets += nb
 
         def compute_avg(list_of_values):
             if (len(list_of_values) == 0):
@@ -101,15 +104,6 @@ class FeaturesCalc():
         #Calcola la durata del flusso di pacchetti.
         def compute_duration_flow(packets_list):
             return packets_list[len(packets_list) - 1].time - packets_list[0].time
-
-        # Calcola la grandezza in byte della lista di pacchetti
-        def window_bytes_lenght(packets_list):
-            total_lenght = []
-            lenght = 0.0
-            pkt_lenght_list = packets_bytes_lenght(packets_list)
-            for pkt_lenght in pkt_lenght_list:
-                lenght += pkt_lenght
-            return total_lenght.append(float(lenght))
 
         # Calcola la grandezza in byte di ogni pacchetto in una lista di pacchetti
         def packets_bytes_lenght(packets_list):
@@ -271,40 +265,50 @@ class FeaturesCalc():
                     rst_counter.append(0.0)
             return (syn_counter, fin_counter, ack_counter, psh_counter, urg_counter, rst_counter)
 
-        syn_lst, fin_lst, ack_lst, psh_lst, urg_lst, rst_lst = compute_tcp_flags(packets_list)
+        if(len(packets_list) < self.get_min_window_size()):
+            print("\nNumero di paccheti troppo basso\n")
+            return None
+        else:
+            syn_lst, fin_lst, ack_lst, psh_lst, urg_lst, rst_lst = compute_tcp_flags(packets_list)
+            syn_avg = compute_avg(syn_lst)
+            fin_avg = compute_avg(fin_lst)
+            ack_avg = compute_avg(ack_lst)
+            psh_avg = compute_avg(psh_lst)
+            urg_avg = compute_avg(urg_lst)
+            rst_avg = compute_avg(rst_lst)
 
-        syn_avg = compute_avg(syn_lst)
-        fin_avg = compute_avg(fin_lst)
-        ack_avg = compute_avg(ack_lst)
-        psh_avg = compute_avg(psh_lst)
-        urg_avg = compute_avg(urg_lst)
-        rst_avg = compute_avg(rst_lst)
+            durationFlow = compute_duration_flow(packets_list)
+            avgTimeFlow = compute_avg(compute_delta_time(packets_list))
+            minTimeFlow = compute_min(compute_delta_time(packets_list))
+            maxTimeFlow = compute_max(compute_delta_time(packets_list))
+            stdevTimeFlow = compute_stDev(compute_delta_time(packets_list))
+            dns_pkt = compute_avg(compute_DNS_packets(packets_list))
+            tcp_pkt = compute_avg(compute_TCP_packets(packets_list))
+            udp_pkt = compute_avg(compute_UDP_packets(packets_list))
+            icmp_pkt = compute_avg(compute_ICMP_packets(packets_list))
+            pktLenghtAvg = compute_avg(packets_bytes_lenght(packets_list))
+            pktLenghtMin = compute_min(packets_bytes_lenght(packets_list))
+            pktLenghtMax = compute_max(packets_bytes_lenght(packets_list))
+            pktLenghtStDev = compute_stDev(packets_bytes_lenght(packets_list))
+            smallPktPayloadAvg = compute_avg(compute_packet_with_small_TCP_payload(packets_list, False))
+            avgPayload = compute_avg(compute_packet_TCP_payload_size(packets_list, False))
+            minPayload = compute_min(compute_packet_TCP_payload_size(packets_list, False))
+            maxPayload = compute_max(compute_packet_TCP_payload_size(packets_list, False))
+            stDevPayload = compute_stDev(compute_packet_TCP_payload_size(packets_list, False))
+            dnsOverTcpRatioNormalized = compute_avg(DNS_over_TCP_ratio(packets_list))
 
-        durationFlow =compute_duration_flow(packets_list)
-        avgTimeFlow = compute_avg(compute_delta_time(packets_list))
-        minTimeFlow = compute_min(compute_delta_time(packets_list))
-        maxTimeFlow = compute_max(compute_delta_time(packets_list))
-        stdevTimeFlow = compute_stDev(compute_delta_time(packets_list))
-        dns_pkt = compute_avg(compute_DNS_packets(packets_list))
-        tcp_pkt = compute_avg(compute_TCP_packets(packets_list))
-        udp_pkt = compute_avg(compute_UDP_packets(packets_list))
-        icmp_pkt = compute_avg(compute_ICMP_packets(packets_list))
-        pktLenghtAvg = compute_avg(packets_bytes_lenght(packets_list))
-        pktLenghtMin = compute_min(packets_bytes_lenght(packets_list))
-        pktLenghtMax = compute_max(packets_bytes_lenght(packets_list))
-        pktLenghtStDev = compute_stDev(packets_bytes_lenght(packets_list))
-        smallPktPayloadAvg = compute_avg(compute_packet_with_small_TCP_payload(packets_list, False))
-        avgPayload = compute_avg(compute_packet_TCP_payload_size(packets_list, False))
-        minPayload = compute_min(compute_packet_TCP_payload_size(packets_list, False))
-        maxPayload = compute_max(compute_packet_TCP_payload_size(packets_list, False))
-        stDevPayload = compute_stDev(compute_packet_TCP_payload_size(packets_list, False))
-        dnsOverTcpRatioNormalized = compute_avg(DNS_over_TCP_ratio(packets_list))
+            row = [syn_avg, urg_avg, fin_avg, ack_avg, psh_avg, rst_avg, dns_pkt, tcp_pkt, udp_pkt, icmp_pkt, durationFlow, avgTimeFlow,
+                    minTimeFlow, maxTimeFlow, stdevTimeFlow, pktLenghtAvg, pktLenghtMin, pktLenghtMax, pktLenghtStDev, smallPktPayloadAvg,
+                    avgPayload, minPayload, maxPayload, stDevPayload, dnsOverTcpRatioNormalized, self.label]
+            increment_sample_nb(1)
+            update_received_pkts(len(packets_list))
+            return row
 
-        row = [syn_avg, urg_avg, fin_avg, ack_avg, psh_avg, rst_avg, dns_pkt, tcp_pkt, udp_pkt, icmp_pkt, durationFlow, avgTimeFlow,
-                minTimeFlow, maxTimeFlow, stdevTimeFlow, pktLenghtAvg, pktLenghtMin, pktLenghtMax, pktLenghtStDev, smallPktPayloadAvg,
-                avgPayload, minPayload, maxPayload, stDevPayload, dnsOverTcpRatioNormalized, self.label]
-        return row
+    def get_total_pkts(self):
+        return self.total_packets
 
+    def get_total_sample(self):
+        return self.nb_samples
 
     def set_min_window_size(self, val):
         self.min_window_size = val
