@@ -1,14 +1,15 @@
 
 class PacketFilter():
 
-    def __init__(self, ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=False, TCP=False, UDP=False, ICMP=False):
+    def __init__(self, ip_whitelist_filter=[], ip_blacklist_filter=[], IPv4=False, TCP=False, UDP=False, ICMP=False, DNS=False):
         self.ip_whitelist_filter = ip_whitelist_filter
         self.ip_blacklist_filter = ip_blacklist_filter
         self.IPv4 = IPv4
         self.TCP = TCP
         self.UDP = UDP
         self.ICMP = ICMP
-        filters = [self.IPv4, self.TCP, self.UDP, self.ICMP]
+        self.DNS = DNS
+        filters = [self.IPv4, self.TCP, self.UDP, self.ICMP, self.DNS]
         assert sum(filters) <= 1, "You have to set just one protocol filter."
         if(len(self.ip_whitelist_filter) > 0 or len(self.ip_blacklist_filter) > 0):
             self.set_IPv4_filter(True)
@@ -59,6 +60,12 @@ class PacketFilter():
             else:
                 return False
 
+        def DNS_filter(pkt):
+            if(pkt.haslayer("DNS")):
+                return True
+            else:
+                return False
+
         def ICMP_filter(pkt):
             if(pkt.haslayer("ICMP")):
                 return True
@@ -66,17 +73,26 @@ class PacketFilter():
                 return False
 
         if(self.get_IPv4_filter() is True):
-            results.append(IPv4_filter(pkt))
+            res = IPv4_filter(pkt)
+            results.append(res)
         if(len(self.get_ip_blacklist_filter()) > 0):
-            results.append(ip_blacklist_filter(pkt, self.get_ip_blacklist_filter()))
+            res =  ip_blacklist_filter(pkt, self.get_ip_blacklist_filter())
+            results.append(res)
         if(len(self.get_ip_whitelist_filter()) > 0):
-            results.append(ip_whitelist_filter(pkt, self.get_ip_whitelist_filter()))
+            res = ip_whitelist_filter(pkt, self.get_ip_whitelist_filter())
+            results.append(res)
         if(self.get_TCP_filter() is True):
-            results.append(TCP_filter(pkt))
+            res = TCP_filter(pkt)
+            results.append(res)
         if(self.get_UDP_filter() is True):
-            results.append(UDP_filter(pkt))
+            res = UDP_filter(pkt)
+            results.append(res)
         if(self.get_ICMP_filter() is True):
-            results.append(ICMP_filter(pkt))
+            res = ICMP_filter(pkt)
+            results.append(res)
+        if(self.get_DNS_filter() is True):
+            res = DNS_filter(pkt)
+            results.append(res)
         if(False in results):
             return False
         else:
@@ -112,6 +128,12 @@ class PacketFilter():
 
     def get_ICMP_filter(self):
         return self.ICMP
+
+    def set_DNS_filter(self, val):
+        self.DNS = val
+
+    def get_DNS_filter(self):
+        return self.DNS
 
     def get_ip_whitelist_filter(self):
         return self.ip_whitelist_filter
