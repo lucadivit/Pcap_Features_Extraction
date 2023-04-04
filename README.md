@@ -73,9 +73,16 @@ if ((filter_2.check_packet_filter(pkt) or filter_1.check_packet_filter(pkt)) is 
 ```
 This code accepts a packet if it has a TCP Layer or UDP Layer.
 
+## Multithreading
+To set the number of threads, edit the following line in Main.py. Replace `<count>` with the amount of threads that you want. Default is `1` thread.
+```
+cfh.compute_features(threads=<count>)
+```
+
 ## Example Of Usage
 In Main.py file there is an example of usage of this program. You can run it with:
 ```
 python3 Main.py
 ```
 This file creates a single csv every run. So if you put 4 pcaps in a generic folder (or in both folders), the Main.py file creates a single csv with features of 4 (or 8) pcaps.
+
