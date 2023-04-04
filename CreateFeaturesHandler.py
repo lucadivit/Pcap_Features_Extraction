@@ -4,6 +4,7 @@ from CSV import CSV
 from PacketFilter import PacketFilter
 from AttackerCalc import AttackerCalc
 import glob
+from concurrent.futures import ThreadPoolExecutor
 
 class CreateFeaturesHandler():
 
@@ -24,7 +25,7 @@ class CreateFeaturesHandler():
             self.csv.create_empty_csv()
             self.csv.add_row(self.featuresCalc.get_features_name())
 
-    def compute_features(self):
+    def compute_features(self, threads=1):
 
         def malware_features():
             folder_name = "Pcaps_Malware"
@@ -33,37 +34,42 @@ class CreateFeaturesHandler():
                 pass
             else:
                 self.featuresCalc.set_flow_type(flow_type)
-            for pcap in glob.glob(folder_name + "/" + "*.pcap"):
-                if(self.single_csv):
-                    csv = self.csv
-                else:
-                    pcap_name = pcap.split("/")
-                    pcap_name = pcap_name[len(pcap_name)-1].replace(".pcap", "")
-                    csv = CSV(file_name=pcap_name, folder_name="Malware_Features")
-                    csv.create_empty_csv()
-                    csv.add_row(self.featuresCalc.get_features_name())
-                array_of_pkts = []
-                print("\nComputing features for " + pcap + "\n")
-                attacker = AttackerCalc(pcap=pcap)
-                ip_to_consider = attacker.compute_attacker()
-                for filter in self.filters:
-                    filter.set_ip_whitelist_filter(ip_to_consider)
-                pkts = rdpcap(pcap)
-                filter_res=[]
-                for pkt in pkts:
+                
+            def task(pcap):
+                    if(self.single_csv):
+                        csv = self.csv
+                    else:
+                        pcap_name = pcap.split("/")
+                        pcap_name = pcap_name[len(pcap_name)-1].replace(".pcap", "")
+                        csv = CSV(file_name=pcap_name, folder_name="Malware_Features")
+                        csv.create_empty_csv()
+                        csv.add_row(self.featuresCalc.get_features_name())
+                    array_of_pkts = []
+                    print("\nComputing features for " + pcap + "\n")
+                    attacker = AttackerCalc(pcap=pcap)
+                    ip_to_consider = attacker.compute_attacker()
                     for filter in self.filters:
-                        if(filter.check_packet_filter(pkt)):
-                            filter_res.append(True)
-                        else:
-                            filter_res.append(False)
-                    if(True in filter_res):
-                        array_of_pkts.append(pkt)
-                    if (len(array_of_pkts) >= self.featuresCalc.get_min_window_size()):
-                        features = self.featuresCalc.compute_features(array_of_pkts)
-                        csv.add_row(features)
-                        array_of_pkts.clear()
-                    filter_res.clear()
+                        filter.set_ip_whitelist_filter(ip_to_consider)
+                    pkts = rdpcap(pcap)
+                    filter_res=[]
+                    for pkt in pkts:
+                        for filter in self.filters:
+                            if(filter.check_packet_filter(pkt)):
+                                filter_res.append(True)
+                            else:
+                                filter_res.append(False)
+                        if(True in filter_res):
+                            array_of_pkts.append(pkt)
+                        if (len(array_of_pkts) >= self.featuresCalc.get_min_window_size()):
+                            features = self.featuresCalc.compute_features(array_of_pkts)
+                            csv.add_row(features)
+                            array_of_pkts.clear()
+                        filter_res.clear()
 
+            pcaps = glob.glob(folder_name + "/" + "*.pcap")
+            with ThreadPoolExecutor(max_workers=threads) as executor:
+                executor.map(task, pcaps)
+            
         def legitimate_features():
             folder_name = "Pcaps_Legitimate"
             flow_type = "legitimate"
@@ -73,7 +79,8 @@ class CreateFeaturesHandler():
                 self.featuresCalc.set_flow_type(flow_type)
             for filter in self.filters:
                 filter.set_ip_whitelist_filter([])
-            for pcap in glob.glob(folder_name + "/" + "*.pcap"):
+
+            def task(pcap):
                 if(self.single_csv):
                     csv = self.csv
                 else:
@@ -99,6 +106,11 @@ class CreateFeaturesHandler():
                         csv.add_row(features)
                         array_of_pkts.clear()
                     filter_res.clear()
+                    
+            pcaps = glob.glob(folder_name + "/" + "*.pcap")
+            with ThreadPoolExecutor(max_workers=threads) as executor:
+                executor.map(task, pcaps)
+
 
         malware_features()
         legitimate_features()
