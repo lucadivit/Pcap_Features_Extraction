@@ -43,7 +43,7 @@ class CreateFeaturesHandler():
                     csv.create_empty_csv()
                     csv.add_row(self.featuresCalc.get_features_name())
                 array_of_pkts = []
-                print("\nCalcolo features di " + pcap + "\n")
+                print("\nComputing features for " + pcap + "\n")
                 attacker = AttackerCalc(pcap=pcap)
                 ip_to_consider = attacker.compute_attacker()
                 for filter in self.filters:
