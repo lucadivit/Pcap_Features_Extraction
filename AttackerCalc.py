@@ -9,8 +9,8 @@ class AttackerCalc():
         self.filter = filter_ip
         self.number_of_ip = number_of_ip
         self.list_of_packets = list_of_packets
-        assert self.get_number_of_ip() == 1, "La classe non e' ancora implementata per riconoscere piu' attacanti"
-        assert self.get_window_size() > 0, "Dimensioni della finestra non valide"
+        assert self.get_number_of_ip() == 1, "Multiple attackers are not supported (yet)"
+        assert self.get_window_size() > 0, "Invalid window size (it must be >=1)"
 
     def compute_attacker(self):
         policy = self.get_policy()
@@ -19,18 +19,18 @@ class AttackerCalc():
         elif(policy == "max_in_window"):
             ip = self.max_in_window_policy()
         else:
-            print("Selezionare una policy.")
+            print("Please select a policy.")
         return ip
 
     def first_ip_policy(self):
-        assert self.list_of_packets is not None or self.pcap is not None, "Assegnare un pcap o una lista di pacchetti"
-        print("\n" + "Calcolo attaccante" + "\n")
+        assert self.list_of_packets is not None or self.pcap is not None, "No PCAP or packets list has been provided"
+        print("\n" + "Processing attacker information" + "\n")
         if(self.get_list_of_packets() is not None):
             pkts = self.get_list_of_packets()
         elif(self.get_pcap() is not None):
             pkts = rdpcap(self.get_pcap())
         else:
-            print("Assegnare un pcap o una lista di pacchetti.")
+            print("No PCAP or packets list has been provided.")
             return []
         ip_list = []
         for i in range(0, len(pkts) - 1):
@@ -45,14 +45,14 @@ class AttackerCalc():
         return ip_list
 
     def max_in_window_policy(self):
-        assert self.list_of_packets is not None or self.pcap is not None, "Assegnare un pcap o una lista di pacchetti"
-        print("\n" + "Calcolo attaccante" + "\n")
+        assert self.list_of_packets is not None or self.pcap is not None, "No PCAP or packets list has been provided"
+        print("\n" + "Processing attacker information" + "\n")
         if(self.get_list_of_packets() is not None):
             pkts = self.get_list_of_packets()
         elif(self.get_pcap() is not None):
             pkts = rdpcap(self.get_pcap())
         else:
-            print("Assegnare un pcap o una lista di pacchetti.")
+            print("No PCAP or packets list has been provided.")
             return []
         ip_dict = {}
         if(len(pkts) >= self.get_window_size()):
@@ -71,7 +71,7 @@ class AttackerCalc():
                 else:
                     pass
         else:
-            print("Fornita una finestra troppo piccola.")
+            print("Window size is too small")
             return []
 
         def find_max_between_IP(ip_dict):
@@ -103,7 +103,7 @@ class AttackerCalc():
         return self.filter
 
     def add_ip_to_filter(self, list_of_ip):
-        assert isinstance(list_of_ip, list), "Inserire gli ip in una lista."
+        assert isinstance(list_of_ip, list), "IPs must be added to the filter in the form of a list"
         for ip in list_of_ip:
             self.filter.append(ip)
 
