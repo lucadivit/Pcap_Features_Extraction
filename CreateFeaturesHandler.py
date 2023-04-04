@@ -9,9 +9,9 @@ class CreateFeaturesHandler():
 
     def __init__(self, pkts_window_size=10, single_csv=True):
         self.pkts_window_size = pkts_window_size
-        assert self.pkts_window_size >=1, "Valore per la finestra non valido"
+        assert self.pkts_window_size >=1, "Invalid window size (it must be >=1)"
         self.single_csv = single_csv
-        assert (self.single_csv is True) or (self.single_csv is False), "Valore non valido per il flag single_csv"
+        assert (self.single_csv is True) or (self.single_csv is False), "Invalid value for the single_csv option (it must be a boolean)"
         self.featuresCalc = FeaturesCalc(flow_type="malware", min_window_size=pkts_window_size)
         ip_to_ignore = ["127.0.0.1"]
         self.filter_1 = PacketFilter(ip_whitelist_filter=[], ip_blacklist_filter=ip_to_ignore, TCP=True)
@@ -43,7 +43,7 @@ class CreateFeaturesHandler():
                     csv.create_empty_csv()
                     csv.add_row(self.featuresCalc.get_features_name())
                 array_of_pkts = []
-                print("\nCalcolo features di " + pcap + "\n")
+                print("\nComputing features for " + pcap + "\n")
                 attacker = AttackerCalc(pcap=pcap)
                 ip_to_consider = attacker.compute_attacker()
                 for filter in self.filters:
@@ -84,7 +84,7 @@ class CreateFeaturesHandler():
                     csv.add_row(self.featuresCalc.get_features_name())
                 array_of_pkts = []
                 filter_res = []
-                print("\nCalcolo features di " + pcap + "\n")
+                print("\nComputing features for " + pcap + "\n")
                 pkts = rdpcap(pcap)
                 for pkt in pkts:
                     for filter in self.filters:

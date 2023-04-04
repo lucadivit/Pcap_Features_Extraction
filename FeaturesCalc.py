@@ -9,8 +9,8 @@ class FeaturesCalc():
     def __init__(self, flow_type, min_window_size=2):
         self.flow_type = flow_type
         self.min_window_size = int(min_window_size)
-        assert self.flow_type == "malware" or self.flow_type == "legitimate", "Flow_type non valido. Valori validi sono malware o legitimate."
-        assert self.min_window_size > 0, "Valore non valido per min_windows_size. Deve essere maggiore di 0."
+        assert self.flow_type == "malware" or self.flow_type == "legitimate", "flow_type is invalid (must be either 'malware' or 'legitimate')"
+        assert self.min_window_size > 0, "Invalid min_windows_size (it must be >=0)."
         self.label = None
         if(self.flow_type == "malware"):
             self.label = self.malware_label
@@ -88,7 +88,7 @@ class FeaturesCalc():
                     else:
                         total_packet_high_level_list.append(0.0)
             else:
-                print("Errore imprevisto in dnsOverTCPRatio()")
+                print("Unexpected error in dnsOverTCPRatio()")
             total_packet_high_level = float(sum(total_packet_high_level_list))
             if (total_packet_high_level != 0):
                 ratio_list.append(float(total_DNS / total_packet_high_level))
@@ -266,7 +266,7 @@ class FeaturesCalc():
             return (syn_counter, fin_counter, ack_counter, psh_counter, urg_counter, rst_counter)
 
         if(len(packets_list) < self.get_min_window_size()):
-            print("\nNumero di paccheti troppo basso\n")
+            print("\nPacket count in list is smaller than the minimum window size\n")
             return None
         else:
             syn_lst, fin_lst, ack_lst, psh_lst, urg_lst, rst_lst = compute_tcp_flags(packets_list)
@@ -323,7 +323,7 @@ class FeaturesCalc():
         return self.min_window_size
 
     def set_flow_type(self, flow_type):
-        assert self.flow_type == "malware" or self.flow_type == "legitimate", "Flow_type non valido. Valori validi sono malware o legitimate."
+        assert self.flow_type == "malware" or self.flow_type == "legitimate", "flow_type is invalid (must be either 'malware' or 'legitimate')"
         self.flow_type = flow_type
         if(self.flow_type == "malware"):
             self.label = self.malware_label
